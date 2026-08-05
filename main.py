@@ -1,5 +1,7 @@
+import os
 import asyncio
 import logging
+from aiohttp import web
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -8,7 +10,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 
 # ==================== SOZLAMALAR ====================
-BOT_TOKEN = "8923907797:AAFLTPsVZ_xF_ndm2vXZc5f6_bx6MX1784k"  # BotFather'dan olingan token
+BOT_TOKEN = "8957824461:AAFXMMAfmCv2aioes9Hx1fO4JX0v8s1QJPQ"  # BotFather'dan olingan token
 ADMIN_ID = 8371392099  # Telegram ID-ingiz
 
 CARD_NUMBER = "5614 6820 1716 6317"
@@ -44,9 +46,9 @@ def stars_menu():
 def premium_menu():
     kb = [
         [InlineKeyboardButton(text="1 Oy Premium — 45 000 so'm", callback_data="buy_prem_1_45000")],
-        [InlineKeyboardButton(text="3 Oy Premium — 160 000 so'm", callback_data="buy_prem_3_160000")],
-        [InlineKeyboardButton(text="6 Oy Premium — 230 000 so'm", callback_data="buy_prem_6_210000")],
-        [InlineKeyboardButton(text="12 Oy Premium — 400 000 so'm", callback_data="buy_prem_12_360000")],
+        [InlineKeyboardButton(text="3 Oy Premium — 155 000 so'm", callback_data="buy_prem_3_155000")],
+        [InlineKeyboardButton(text="6 Oy Premium — 225 000 so'm", callback_data="buy_prem_6_225000")],
+        [InlineKeyboardButton(text="12 Oy Premium — 400 000 so'm", callback_data="buy_prem_12_397000")],
     ]
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
@@ -85,7 +87,7 @@ async def process_buy(callback: types.CallbackQuery, state: FSMContext):
     price = data[3]
 
     title = f"{amount} Stars" if item_type == "stars" else f"{amount} Oylik Premium"
-    await state.update_data(item_title=title, price=price, item_type=item_type, amount=amount)
+    await state.update_data(item_title=title, price=price)
     
     extra_note = ""
     if item_type == "prem" and amount == "1":
@@ -98,7 +100,6 @@ async def process_buy(callback: types.CallbackQuery, state: FSMContext):
     )
     await state.set_state(OrderState.waiting_for_username)
 
-# Username qabul qilish
 @dp.message(OrderState.waiting_for_username, F.text)
 async def process_username(message: types.Message, state: FSMContext):
     username = message.text.strip()
@@ -117,7 +118,6 @@ async def process_username(message: types.Message, state: FSMContext):
     )
     await state.set_state(OrderState.waiting_for_receipt)
 
-# Chekni qabul qilish
 @dp.message(OrderState.waiting_for_receipt, F.photo | F.document)
 async def process_receipt(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
@@ -150,7 +150,6 @@ async def process_receipt(message: types.Message, state: FSMContext):
 
     await state.clear()
 
-# Admin status tugmalari
 @dp.callback_query(F.data.startswith(("done_", "reject_")))
 async def process_admin_action(callback: types.CallbackQuery):
     action, user_id = callback.data.split("_")
@@ -163,18 +162,30 @@ async def process_admin_action(callback: types.CallbackQuery):
         await bot.send_message(chat_id=user_id, text="❌ To'lovingiz tasdiqlanmadi yoki xatolik yuz berdi. Iltimos, admin bilan bog'laning.")
         await callback.message.edit_caption(caption=callback.message.caption + "\n\n🔴 **HOLAT: RAD ETILDI**")
 
-# ==================== KUTILMAGAN XABARLARNI TUTIB OLISH (CATCH-ALL) ====================
-# Foydalanuvchi kutilmagan stiker, audio, ortqcha matn va h.k. yuborsa bosh menyuni ochib beradi.
 @dp.message()
 async def fallback_unknown_message(message: types.Message, state: FSMContext):
-    await state.clear()  # Jarayonni tozalaymiz
+    await state.clear()
     await message.answer(
         "Iltimos, pastdagi menyudan foydalaning 👇",
         reply_markup=main_menu()
     )
 
+# ==================== RENDER UCHUN VEB-SERVER (PORT TINGLOVCHI) ====================
+async def handle(request):
+    return web.Response(text="Bot Render serverida muvaffaqiyatli ishlayapti!")
+
 async def main():
-    print("Bot ishga tushdi...")
+    # Render avtomatik beradigan PORT ni olamiz
+    PORT = int(os.environ.get("PORT", 8080))
+    
+    app = web.Application()
+    app.router.add_get("/", handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", PORT)
+    await site.start()
+    
+    print(f"Veb-server {PORT}-portda ishga tushdi...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
