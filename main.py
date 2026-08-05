@@ -10,7 +10,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 
 # ==================== SOZLAMALAR ====================
-BOT_TOKEN = "8957824461:AAFXMMAfmCv2aioes9Hx1fO4JX0v8s1QJPQ"  # BotFather'dan olingan token
+BOT_TOKEN = "8675542895:AAEr2_UCszsVB5xAqL-fmSr5EQkee1H5M1c"  # BotFather'dan olingan token
 ADMIN_ID = 8371392099  # Telegram ID-ingiz
 
 CARD_NUMBER = "5614 6820 1716 6317"
