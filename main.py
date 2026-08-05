@@ -9,9 +9,10 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 
-# ==================== SOZLAMALAR ====================
-BOT_TOKEN = "8675542895:AAEr2_UCszsVB5xAqL-fmSr5EQkee1H5M1c"  # BotFather'dan olingan token
-ADMIN_ID = 8371392099  # Telegram ID-ingiz
+# ==================== XAVFSIZ SOZLAMALAR ====================
+# Token serverning Environment Variables qismidan olinadi (kod ichida ko'rinmaydi)
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+ADMIN_ID = 8371392099  # Telegram ID-ingizni kiriting
 
 CARD_NUMBER = "5614 6820 1716 6317"
 CARD_NAME = "Muxammadiyeva Dilafruz"
@@ -170,14 +171,12 @@ async def fallback_unknown_message(message: types.Message, state: FSMContext):
         reply_markup=main_menu()
     )
 
-# ==================== RENDER UCHUN VEB-SERVER (PORT TINGLOVCHI) ====================
+# ==================== RENDER UCHUN VEB-SERVER ====================
 async def handle(request):
     return web.Response(text="Bot Render serverida muvaffaqiyatli ishlayapti!")
 
 async def main():
-    # Render avtomatik beradigan PORT ni olamiz
     PORT = int(os.environ.get("PORT", 8080))
-    
     app = web.Application()
     app.router.add_get("/", handle)
     runner = web.AppRunner(app)
