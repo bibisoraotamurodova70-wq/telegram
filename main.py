@@ -1,6 +1,8 @@
 import asyncio
 import logging
+import os
 import sqlite3
+from aiohttp import web
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -717,9 +719,25 @@ async def fallback_handler(message: types.Message, state: FSMContext):
     )
 
 
+# ==================== RENDER UCHUN SOXTA WEB-SERVER ====================
+async def handle_web_request(request):
+  return web.Response(text="Bot is Live and Running!")
+
+
 # ==================== MAIN ====================
 async def main():
   init_db()
+
+  # Render beradigan portni ochib, tekshiruvdan o'tish
+  app = web.Application()
+  app.router.add_get("/", handle_web_request)
+  runner = web.AppRunner(app)
+  await runner.setup()
+  port = int(os.environ.get("PORT", 8080))
+  site = web.TCPSite(runner, "0.0.0.0", port)
+  await site.start()
+
+  # Telegram bot polling rejimida ishga tushishi
   await dp.start_polling(bot)
 
 
